@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  #  Scrape Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scrape Node Exporter
+  - job_name: 'node_exporter'
+    static_configs:
+      # We use the docker service name "node_exporter", not localhost
+      - targets: ['node_exporter:9100']
+
+  # Scrape Loki
+  - job_name: 'loki'
+    static_configs:
+      - targets: ['loki:3100']
