@@ -19,4 +19,3 @@ Repository to test observability environment
 ```sh
 docker-compose up
 ```
-```
