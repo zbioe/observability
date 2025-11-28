@@ -1,6 +1,6 @@
 # Observability Playground
 
-Repository to test observability environment
+Repository to test observability stack
 
 # Requirements
 
