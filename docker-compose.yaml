@@ -1,6 +1,12 @@
 networks:
   app:
 
+volumes:
+  loki_data:
+  prometheus_data:
+  grafana_data:
+  promtail_data:
+
 services:
   # Loki (Log Aggregation Store)
   loki:
@@ -10,6 +16,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./loki/local-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
     networks:
       - app
 
@@ -20,6 +27,7 @@ services:
       - /run/user/1000/docker.sock:/var/run/docker.sock
       - ./promtail/config.yaml:/etc/promtail/config.yaml
       - /var/log:/var/log # Mount host logs (optional)
+      - promtail_data:/var/lib/promtail
     command: -config.file=/etc/promtail/config.yaml
     networks:
       - app
@@ -31,27 +39,34 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yaml
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
     networks:
       - app
 
   # Grafana (Visualisation UI)
   grafana:
     image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+      # Change default grafana icon
+      - ./grafana/assets/logo.svg:/usr/share/grafana/public/img/grafana_icon.svg
+      - ./grafana/assets/logo.svg:/usr/share/grafana/public/img/grafana_com_auth_icon.svg
+      - ./grafana/assets/logo.svg:/usr/share/grafana/public/img/grafana_logo_wordmark.svg
+      - ./grafana/assets/logo.png:/usr/share/grafana/public/img/fav32.png
+      - ./grafana/assets/logo.png:/usr/share/grafana/public/img/apple-touch-icon.png
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_PATHS_DATA=/var/lib/grafana
+      - GF_PATHS_LOGS=/var/lib/grafana/logs
+      - GF_PATHS_PLUGINS=/var/lib/grafana/plugins
       - GF_AUTH_ANONYMOUS_ENABLED=false # Set to true to skip login
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     ports:
       - "3000:3000"
-    networks:
-      - app
-
-  # Flog (Fake Log Generator for demo data)
-  flog:
-    image: mingrammer/flog
-    command: -f json -d 1s -l
     networks:
       - app
 
@@ -73,3 +88,10 @@ services:
       - "9100:9100"
     networks:
       - app
+
+  # Flog (Fake Log Generator for demo data)
+  # flog:
+  #   image: mingrammer/flog
+  #   command: -f json -d 1s -l
+  #   networks:
+  #     - app
