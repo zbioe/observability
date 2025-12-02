@@ -24,6 +24,7 @@ services:
   promtail:
     image: grafana/promtail:2.9.2
     volumes:
+      # rootless docker socket mapped inside the VM
       - /run/user/1000/docker.sock:/var/run/docker.sock
       - ./promtail/config.yaml:/etc/promtail/config.yaml
       - /var/log:/var/log # Mount host logs (optional)
@@ -76,6 +77,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - /run/udev/data:/run/udev/data:ro
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
