@@ -49,15 +49,12 @@ services:
 
   # Grafana (Visualisation UI)
   grafana:
-    image: grafana/grafana:latest
+    # build custom image to replace the logo
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile
     volumes:
       - grafana_data:/var/lib/grafana
-      # Change default grafana icon
-      - ./grafana/assets/logo.svg:/usr/share/grafana/public/img/grafana_icon.svg
-      - ./grafana/assets/logo.svg:/usr/share/grafana/public/img/grafana_com_auth_icon.svg
-      - ./grafana/assets/logo.svg:/usr/share/grafana/public/img/grafana_logo_wordmark.svg
-      - ./grafana/assets/logo.png:/usr/share/grafana/public/img/fav32.png
-      - ./grafana/assets/logo.png:/usr/share/grafana/public/img/apple-touch-icon.png
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_PATHS_DATA=/var/lib/grafana
