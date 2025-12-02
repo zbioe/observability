@@ -1,10 +1,12 @@
 # Observability Playground
 
-Repository to test observability stack
+Repository to test observability stack.
+
+Improved for NixOS using Docker in rootless mode.
 
 # Requirements
 
-- Docker
+- docker
 - docker-compose
 
 ## Components 
