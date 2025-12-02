@@ -1,0 +1,80 @@
+//
+// Central Output (Loki)
+//
+
+// Define where to send the logs (The "Receiver")
+loki.write "local_loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+//
+// Docker Logs
+//
+// This finds all containers running on the Docker Socket
+discovery.docker "linux" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Clean up the Labels (Relabeling)
+discovery.relabel "docker_logs" {
+  targets = discovery.docker.linux.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    target_label  = "container_name"
+  }
+}
+
+// Read docker logs
+loki.source.docker "docker_logs" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.docker_logs.output
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+//
+// System Logs
+//
+
+// Find files
+local.file_match "system_logs" {
+  path_targets = [
+    { "__path__" = "/var/log/*.log" },
+    { "__path__" = "/var/log/syslog" },
+  ]
+}
+
+discovery.relabel "system_logs_tags" {
+  targets = local.file_match.system_logs.targets
+
+  rule {
+    target_label = "job"
+    replacement  = "varlogs"
+  }
+}
+
+// Read the files
+loki.source.file "system_file_read" {
+  targets    = discovery.relabel.system_logs_tags.output
+  forward_to = [loki.write.local_loki.receiver]
+}
+
+
+//
+// Self Monitoring (send it owns metrics to prometheus)
+//
+
+// prometheus.exporter.self "alloy_health" {}
+//
+// prometheus.scrape "alloy_scrape" {
+//   targets    = prometheus.exporter.self.alloy_health.targets
+//   forward_to = [prometheus.remote_write.local_prom.receiver]
+// }
+//
+// prometheus.remote_write "local_prom" {
+//   endpoint {
+//     url = "http://prometheus:9090/api/v1/write"
+//   }
+// }

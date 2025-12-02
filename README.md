@@ -14,7 +14,7 @@ Improved for NixOS using Docker in rootless mode.
 - Prometheus (Time-series database for metrics) `:9090`
 - Loki (Log aggregation) `:3100`
 - Node Exporter (Hardware/OS Metrics) `:9100`
-- Promtail (Log collector) 
+- Alloy (Log collector) 
 - Flog (Fake log generator for testing) 
 
 # Run

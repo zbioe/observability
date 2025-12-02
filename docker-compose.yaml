@@ -5,7 +5,7 @@ volumes:
   loki_data:
   prometheus_data:
   grafana_data:
-  promtail_data:
+  alloy_data:
 
 services:
   # Loki (Log Aggregation Store)
@@ -20,16 +20,22 @@ services:
     networks:
       - app
 
-  # Promtail (Log Collector - ships logs to Loki)
-  promtail:
-    image: grafana/promtail:2.9.2
+  # Grafana Alloy (The new Log Collector)
+  alloy:
+    image: grafana/alloy:latest
     volumes:
-      # rootless docker socket mapped inside the VM
-      - /run/user/1000/docker.sock:/var/run/docker.sock
-      - ./promtail/config.yaml:/etc/promtail/config.yaml
-      - /var/log:/var/log # Mount host logs (optional)
-      - promtail_data:/var/lib/promtail
-    command: -config.file=/etc/promtail/config.yaml
+      # Rootless docker socket mapped inside the VM
+      - /run/user/1000/docker.sock:/var/run/docker.sock:ro
+      - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - /var/log:/var/log:ro # Mount host logs (optional)
+      - alloy_data:/var/lib/alloy/data
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    ports:
+      - "12345:12345" # Alloy UI (very useful for debugging!)
     networks:
       - app
 
@@ -94,3 +100,18 @@ services:
   #   command: -f json -d 1s -l
   #   networks:
   #     - app
+
+  # TODO next:
+  # - blackbox
+  # - alertmanager
+
+  # TODO after next:
+  # - Speedtest
+
+  # Maybe TODO:
+  # - Process Exporter
+
+  # TODO After all:
+  # - mongodb
+  # - neo4j
+  # - postgres
