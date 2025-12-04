@@ -101,6 +101,9 @@ services:
   # Flog (Fake Log Generator for demo data)
   flog:
     image: mingrammer/flog
+    deploy:
+      # Only add FLOG when the number of replicas is greater than 0
+      replicas: ${FLOG_COUNT:-1}
     command: -f json -d 1s -l
     networks:
       - app

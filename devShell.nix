@@ -10,7 +10,7 @@ mkShell {
     let
       # Envs default value
       envs = {
-        PROVIDER = "docker-compose";
+        FLOG_COUNT = "1";
       };
       exportEnvOrDefault = env: default: ''export ${env}=''${${env}:-"${default}"}'';
       exportEnvs =
