@@ -18,6 +18,21 @@ Improved for NixOS using Docker in rootless mode.
 - Flog (Fake log generator for testing) 
 
 # Run
+defaults (1 flog)
+
 ```sh
 docker-compose up
 ```
+
+to disable Flog
+
+``` sh
+FLOG_COUNT=0 docker-compose up
+```
+
+to more flogs
+
+``` sh
+FLOG_COUNT=3 docker-compose up
+```
+

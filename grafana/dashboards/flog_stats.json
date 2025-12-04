@@ -69,7 +69,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Flog (fake log dashboard)",
-  "uid": "flog-generated-stats",
+  "uid": "flog-stats",
   "version": 1,
   "weekStart": ""
 }

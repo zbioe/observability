@@ -1,4 +1,11 @@
 //
+// Global Configuration
+//
+logging {
+  level  = "info"
+  format = "json"
+}
+//
 // Central Output (Loki)
 //
 
@@ -66,15 +73,15 @@ loki.source.file "system_file_read" {
 // Self Monitoring (send it owns metrics to prometheus)
 //
 
-// prometheus.exporter.self "alloy_health" {}
-//
-// prometheus.scrape "alloy_scrape" {
-//   targets    = prometheus.exporter.self.alloy_health.targets
-//   forward_to = [prometheus.remote_write.local_prom.receiver]
-// }
-//
-// prometheus.remote_write "local_prom" {
-//   endpoint {
-//     url = "http://prometheus:9090/api/v1/write"
-//   }
-// }
+prometheus.exporter.self "alloy_health" {}
+
+prometheus.scrape "alloy_scrape" {
+  targets    = prometheus.exporter.self.alloy_health.targets
+  forward_to = [prometheus.remote_write.local_prom.receiver]
+}
+
+prometheus.remote_write "local_prom" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
