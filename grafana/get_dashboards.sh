@@ -28,7 +28,22 @@ sed -i 's/${DS_THEMIS}/prometheus/g' "$TARGET_DIR/prometheus_stats.json"
 # Alloy
 cat <<'EOF' > "$TARGET_DIR/alloy_health.json"
 {
-  "annotations": { "list": [] },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
@@ -78,6 +93,58 @@ cat <<'EOF' > "$TARGET_DIR/alloy_health.json"
       "panels": [],
       "title": "Logs Analysis",
       "type": "row"
+    },
+{
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "id": 4,
+      "title": "Go Runtime Metrics",
+      "type": "row",
+      "collapsed": false
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "short" } },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 10 },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "go_goroutines{job=\"alloy\"}",
+          "legendFormat": "Goroutines",
+          "refId": "A"
+        }
+      ],
+      "title": "Goroutines",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "bytes" } },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 10 },
+      "id": 6,
+      "targets": [
+        {
+          "expr": "go_memstats_heap_inuse_bytes{job=\"alloy\"}",
+          "legendFormat": "Heap In Use",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory (Heap)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" }, "unit": "hz" } },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 10 },
+      "id": 7,
+      "targets": [
+        {
+          "expr": "rate(go_gc_duration_seconds_count{job=\"alloy\"}[1m])",
+          "legendFormat": "GC Rate",
+          "refId": "A"
+        }
+      ],
+      "title": "Garbage Collections / Sec",
+      "type": "timeseries"
     },
     {
       "datasource": "Loki",
@@ -130,15 +197,6 @@ cat <<'EOF' > "$TARGET_DIR/alloy_health.json"
       "title": "Level Distribution",
       "type": "piechart"
     },
-    {
-      "datasource": "Loki",
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 12 },
-      "id": 6,
-      "options": { "dedupStrategy": "none", "enableLogDetails": true, "prettifyLogMessage": false, "showCommonLabels": false, "showLabels": false, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": false },
-      "targets": [ { "expr": "{container_name=~\".*alloy.*\"} | regexp \"(?P<json_content>[{].*)\" | line_format \"{{.json_content}}\" | json | __error__=\"\"", "refId": "A" } ],
-      "title": "Alloy Logs",
-      "type": "logs"
-    },
      {
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
@@ -156,6 +214,15 @@ cat <<'EOF' > "$TARGET_DIR/alloy_health.json"
       "targets": [ { "expr": "sum(rate(loki_write_sent_entries_total[1m]))", "legendFormat": "Processed Lines / Sec", "refId": "A" } ],
       "title": "Log Processing Speed (Lines/sec)",
       "type": "timeseries"
+    },
+    {
+      "datasource": "Loki",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 12 },
+      "id": 6,
+      "options": { "dedupStrategy": "none", "enableLogDetails": true, "prettifyLogMessage": false, "showCommonLabels": false, "showLabels": false, "showTime": true, "sortOrder": "Descending", "wrapLogMessage": false },
+      "targets": [ { "expr": "{container_name=~\".*alloy.*\"} | regexp \"(?P<json_content>[{].*)\" | line_format \"{{.json_content}}\" | json | __error__=\"\"", "refId": "A" } ],
+      "title": "Alloy Logs",
+      "type": "logs"
     }
   ],
   "schemaVersion": 38,
